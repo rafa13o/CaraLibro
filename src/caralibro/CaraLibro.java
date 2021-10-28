@@ -40,8 +40,8 @@ public class CaraLibro {
                 grumos.add(usuariosGrumo);
             }
             quitarVacios(grumos);
-            //System.out.println(grumos.toString());
-            ordenarGrumos();
+            ordenarGrumos(grumos);
+            System.out.println(grumos.toString());
         }else{
             
         }
@@ -191,6 +191,22 @@ public class CaraLibro {
             }
         } while (unaVacia);
     }
+    
+    private static void ordenarGrumos(ArrayList grumos){
+        for (int i = 0; i<grumos.size(); i++){
+            int siguiente = i+1;
+            if(siguiente>=grumos.size()){
+                break;
+            }
+            ArrayList lista1 = (ArrayList) grumos.get(i);           
+            ArrayList lista2 = (ArrayList) grumos.get(siguiente);
+            if(lista2.size()>lista1.size()){
+                ArrayList listaTemporal = lista2;
+                grumos.remove(siguiente);
+                grumos.add(i, listaTemporal);
+            }
+        }
+    }
 
     /**
      * Función que imprime la hora cuando se la invoca
@@ -198,7 +214,7 @@ public class CaraLibro {
     private static void hora() {
         DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss.ms");
         Date date = new Date();
-        System.out.println("Hora actual: " + dateFormat.format(date));
+        System.out.println("Milisegundos: " + date.getTime());
     }
 
 }
