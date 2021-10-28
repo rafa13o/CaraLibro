@@ -126,7 +126,6 @@ public class CaraLibro {
         int contador = 0;
 
         //ordenarConexiones();
-
         // Primera agrupacion de grumos
         for (Object usuario : listadoUsuarios) {
             if (!usuariosProcesados.contains(usuario)) {
@@ -156,33 +155,47 @@ public class CaraLibro {
         }
         System.out.println(grumos.toString());
 
-        boolean cambiosRealizados = false;
+        boolean cambiosRealizados = true;
 
         //Segunda agrupacion de grumos
-        for (int i = 0; i < grumos.size(); i++) {
-            int siguiente = i + 1;
-            if (siguiente >= grumos.size()) {
-                break; // Corto ejecución
-            }
-            ArrayList grumo1 = (ArrayList) grumos.get(i);
-            ArrayList grumo2 = (ArrayList) grumos.get(siguiente); // Empiezo a mirar a partir del segundo grumo
+        int tamanioGrumos = grumos.size();
+        int siguiente;
+        for (int i = 0; i < tamanioGrumos; i++) {
+            
+            do {
+                System.out.println(grumos.size());
+                tamanioGrumos = grumos.size();
+                cambiosRealizados = false;
 
-            for (int j = 0; j < grumo2.size(); j++) {
-                if (grumo1.contains(grumo2.get(j))) {
-                    cambiosRealizados = true;
-                    for (int k = 0; k < grumo2.size(); k++) {
-                        if (!grumo1.contains(grumo2.get(k))) {
-                            grumo1.add(grumo2.get(k));
+                siguiente = i + 1;
+                
+                if(siguiente>=tamanioGrumos){
+                    break;
+                }
+
+                ArrayList grumo1 = (ArrayList) grumos.get(i);
+                ArrayList grumo2 = (ArrayList) grumos.get(siguiente); // Empiezo a mirar a partir del segundo grumo
+
+                for (int j = 0; j < grumo2.size(); j++) {
+                    if (grumo1.contains(grumo2.get(j))) {
+                        cambiosRealizados = true;
+                        for (int k = 0; k < grumo2.size(); k++) {
+                            if (!grumo1.contains(grumo2.get(k))) {
+                                grumo1.add(grumo2.get(k));
+                            }
                         }
                     }
                 }
-            }
-            if (cambiosRealizados) {
-                cambiosRealizados = false;
-                grumos.remove(siguiente);
-            }
+                if (cambiosRealizados) {
+                    //cambiosRealizados = false;
+                    grumos.remove(siguiente);
+                }
+                System.out.println(grumos.toString());
+            }while (cambiosRealizados);
+            if(siguiente>=tamanioGrumos){
+                    break;
+                }
         }
-
         System.out.println(grumos.toString());
     }
 
