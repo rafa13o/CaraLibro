@@ -5,9 +5,11 @@
  */
 package caralibro;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -95,8 +97,8 @@ public class CaraLibro {
      * contrario
      */
     public static boolean leerArchivo(boolean tipoFichero) {
-        FileInputStream ficheroStream = null;
-        Scanner miEscaner = null;
+        FileReader fileReader = null;
+        BufferedReader bufferedReader = null;
         int contadorLinea = 0; //Cuenta la linea del archivo en la que me llego
         String archivoALeer;
 
@@ -107,26 +109,27 @@ public class CaraLibro {
         }
 
         try {
-            ficheroStream = new FileInputStream("DOCS/" + archivoALeer);
-            miEscaner = new Scanner(ficheroStream, "UTF-8");
+            fileReader = new FileReader("DOCS/" + archivoALeer);
+            bufferedReader = new BufferedReader(fileReader);
             elAnalisis.tILecturaFichero = hora();
-            while (miEscaner.hasNextLine()) {
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
                 elAnalisis.tIListaUsuarios = hora();
                 if (tipoFichero) { //Es el inicial
                     if (contadorLinea > 1) {
-                        procesarConexiones(miEscaner.nextLine());
+                        procesarConexiones(line);
                     } else {
                         switch (contadorLinea) {
                             case 0:
-                                elAnalisis.numeroUsuarios = Integer.parseInt(miEscaner.nextLine());
+                                elAnalisis.numeroUsuarios = Integer.parseInt(line);
                                 break;
                             case 1:
-                                elAnalisis.numeroConexiones = Integer.parseInt(miEscaner.nextLine());
+                                elAnalisis.numeroConexiones = Integer.parseInt(line);
                                 break;
                         }
                     }
                 } else {
-                    procesarConexiones(miEscaner.nextLine());
+                    procesarConexiones(line);
                 }
                 contadorLinea++;
             }
@@ -143,8 +146,8 @@ public class CaraLibro {
             return false;
         } finally {
             try {
-                ficheroStream.close();
-                miEscaner.close();
+                fileReader.close();
+                bufferedReader.close();
             } catch (IOException ioEx) {
                 System.err.println("Un archivo, o los dos, no se pudo cerrar bien.");
             }
