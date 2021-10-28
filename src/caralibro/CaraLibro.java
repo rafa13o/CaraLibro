@@ -32,26 +32,18 @@ public class CaraLibro {
     public static void main(String[] args) {
         elAnalisis = new Analisis();
 
-        ArrayList usuariosGrumo; // Listado de los usuarios que pertenecen a un grumo
+        System.out.println(
+                "ANÁLISIS DE CARALIBRO\n"
+                + "---------------------");
 
         // Llamadas necesarias a funciones
-        pedirNombreArchivo();
-
-        if (leerArchivo()) { // Se ha leído y procesado correctamente
-            for (Object usuario : elAnalisis.listadoUsuarios) {
-                usuariosGrumo = new ArrayList();
-                uber_amigos((int) usuario, elAnalisis.listadoConexiones, usuariosGrumo);
-                elAnalisis.grumos.add(usuariosGrumo);
-            }
-            quitarVacios(elAnalisis.grumos);
-            //System.out.println(elAnalisis.grumos.toString());
-        } else {
-
-        }
-
-        //pedirPorcentaje();
+        pedirDatos();
+        crearGrumos();
+        System.out.printf("Creación lista grumos: %.5f seg.\n", elAnalisis.tiempoListaGrumos());
+        System.out.println("Existen "+elAnalisis.grumos.size()+" grumos.");
         ordenarGrumos();
         seleccionarGrumos();
+        System.out.printf("Ordenación y selección de grumos: %.5f seg.\n", elAnalisis.tiempoOrdenarYSeleccionar());
 
         /*
         System.out.println("Nº Usuarios: " + claseInicial.numeroUsuarios);
@@ -69,81 +61,93 @@ public class CaraLibro {
      * Pide el nombre del archivo al usuario y agrega el .txt para que se pueda
      * localizar
      */
-    private static void pedirNombreArchivo() {
+    private static void pedirDatos() {
         Scanner miEscanner = new Scanner(System.in);
 
         // Pedir nombre fichero inicial
         System.out.print("Fichero principal: ");
         elAnalisis.nombreFicheroPrincipal = miEscanner.nextLine();
-        elAnalisis.nombreFicheroPrincipal += ".txt";
+        leerArchivo(true);
+        System.out.printf("Lectura fichero: %.5f seg.\n", elAnalisis.tiempoLectura());
+
+        // Pedir fichero de nuevas conexiones
+        System.out.print("Fichero de nuevas conexiones (pulse enter si no existe): ");
+        elAnalisis.nombreFicheroNuevasConexiones = miEscanner.nextLine();
+        if (elAnalisis.nombreFicheroNuevasConexiones != null && !elAnalisis.nombreFicheroNuevasConexiones.equals("")) {
+            leerArchivo(false);
+        }
+        System.out.println(elAnalisis.numeroUsuarios + " usuarios, " + elAnalisis.listadoConexiones.size() + " conexiones");
 
         // Pedir porcentaje
-        System.out.print("Indicque porcentaje: ");
+        System.out.print("Porcentaje tamaño mayor grumo: ");
         elAnalisis.porcentajeDeseado = miEscanner.nextFloat();
         miEscanner.close();
+
+        System.out.printf("Creación lista usuarios: %.5f seg.\n", elAnalisis.tiempoListaUsuarios());
     }
 
-    private static void pedirNombreNuevasConexiones() {
-        Scanner miEscanner = new Scanner(System.in);
-        System.out.print("Fichero de nuevas conexiones (pulse enter si no existe): ");
-        elAnalisis.nombreFicheroPrincipal = miEscanner.nextLine();
-        miEscanner.close();
-
-    }
-
-    /*private static void pedirPorcentaje() {
-        miEscanner.reset();
-        elAnalisis.porcentajeDeseado = miEscanner.nextFloat();
-        miEscanner.close();
-    }*/
     /**
      * Lee el fichero de inicio del programa. Procesa cada línea (nUsuarios,
      * nConexiones, conexiones) Comprueba si el fichero existe y se puede leer
      *
-     * @param nombreFicheroInicio Nombre del fichero de lectura que ha indicado
-     * el usuario
-     * @param listadoConexiones
-     * @param listadoUsuarios
+     * @param tipoFichero TRUE si es el inicial, FALSE si es el extra
      * @return TRUE si el fichero existe y se ha podido procesar, FALSE en caso
      * contrario
      */
-    public static boolean leerArchivo() {
-        FileInputStream ficheroStream;
-        Scanner miEscaner;
+    public static boolean leerArchivo(boolean tipoFichero) {
+        FileInputStream ficheroStream = null;
+        Scanner miEscaner = null;
         int contadorLinea = 0; //Cuenta la linea del archivo en la que me llego
+        String archivoALeer;
+
+        if (tipoFichero) {
+            archivoALeer = elAnalisis.nombreFicheroPrincipal;
+        } else {
+            archivoALeer = elAnalisis.nombreFicheroNuevasConexiones;
+        }
 
         try {
-            ficheroStream = new FileInputStream("DOCS/" + elAnalisis.nombreFicheroPrincipal);
+            ficheroStream = new FileInputStream("DOCS/" + archivoALeer);
             miEscaner = new Scanner(ficheroStream, "UTF-8");
             elAnalisis.tILecturaFichero = hora();
             while (miEscaner.hasNextLine()) {
-                //System.out.println(contadorLinea);
-                if (contadorLinea > 1) {
-                    procesarConexiones(miEscaner.nextLine(), elAnalisis.listadoConexiones, elAnalisis.listadoUsuarios);
-                } else {
-                    switch (contadorLinea) {
-                        case 0:
-                            elAnalisis.numeroUsuarios = Integer.parseInt(miEscaner.nextLine());
-                            break;
-                        case 1:
-                            elAnalisis.numeroConexiones = Integer.parseInt(miEscaner.nextLine());
-                            break;
+                elAnalisis.tIListaUsuarios = hora();
+                if (tipoFichero) { //Es el inicial
+                    if (contadorLinea > 1) {
+                        procesarConexiones(miEscaner.nextLine());
+                    } else {
+                        switch (contadorLinea) {
+                            case 0:
+                                elAnalisis.numeroUsuarios = Integer.parseInt(miEscaner.nextLine());
+                                break;
+                            case 1:
+                                elAnalisis.numeroConexiones = Integer.parseInt(miEscaner.nextLine());
+                                break;
+                        }
                     }
+                } else {
+                    procesarConexiones(miEscaner.nextLine());
                 }
                 contadorLinea++;
             }
+            elAnalisis.tFListaUsuarios = hora();
             elAnalisis.tFLecturaFichero = hora();
             //System.out.println("Numero usuarios: " + numeroUsuarios);
             //System.out.println("Numero conexiones: " + numeroConexiones);
             //System.out.println("");
-            ficheroStream.close();
-            miEscaner.close();
         } catch (FileNotFoundException fnfEx) {
             System.err.println("No se ha encontrado el archivo " + elAnalisis.nombreFicheroPrincipal);
             return false;
         } catch (Exception ex) {
             System.err.println("Error no controlado.");
             return false;
+        } finally {
+            try {
+                ficheroStream.close();
+                miEscaner.close();
+            } catch (IOException ioEx) {
+                System.err.println("Un archivo, o los dos, no se pudo cerrar bien.");
+            }
         }
 
         return true;
@@ -155,7 +159,7 @@ public class CaraLibro {
      * @param listadoConexiones
      * @param listadoUsuarios
      */
-    private static void procesarConexiones(String conexion, ArrayList listadoConexiones, ArrayList listadoUsuarios) {
+    private static void procesarConexiones(String conexion) {
         Conexion laConexion;
 
         String[] listaConexion = conexion.split(" ");
@@ -163,14 +167,14 @@ public class CaraLibro {
         int usuario2 = Integer.parseInt(listaConexion[1]);
         laConexion = new Conexion(usuario1, usuario2);
         //System.err.println("Conexión: \n\tu1: " + usuario1 + "\n\tu2: " + usuario2);
-        listadoConexiones.add(laConexion);
+        elAnalisis.listadoConexiones.add(laConexion);
 
-        if (!listadoUsuarios.contains(usuario1)) { //Si el usuario no existe
-            listadoUsuarios.add(usuario1);
+        if (!elAnalisis.listadoUsuarios.contains(usuario1)) { //Si el usuario no existe
+            elAnalisis.listadoUsuarios.add(usuario1);
         }
 
-        if (!listadoUsuarios.contains(usuario2)) {
-            listadoUsuarios.add(usuario2);
+        if (!elAnalisis.listadoUsuarios.contains(usuario2)) {
+            elAnalisis.listadoUsuarios.add(usuario2);
         }
     }
 
@@ -220,6 +224,7 @@ public class CaraLibro {
     }
 
     private static void ordenarGrumos() {
+        elAnalisis.tIOrdenarYSeleccionar = hora();
         for (int i = 0; i < elAnalisis.grumos.size(); i++) {
             int siguiente = i + 1;
             if (siguiente >= elAnalisis.grumos.size()) {
@@ -263,7 +268,6 @@ public class CaraLibro {
                 float porcentajeGrumo = cantidadUsuariosEnGrumo * 100 / elAnalisis.numeroUsuarios;
                 System.out.println("#" + numeroGrumo + ": " + cantidadUsuariosEnGrumo + " usuarios " + porcentajeGrumo + " %");
             }
-            System.out.println(grumosSeleccionados.toString());
             System.out.println("Nuevas relaciones de amistad (salvadas en extra.txt)");
             for (int i = 0; i < grumosSeleccionados.size(); i++) {
                 int usuario1, usuario2;
@@ -291,9 +295,9 @@ public class CaraLibro {
             salvarConexiones();
         } else {
             System.out.println("El mayor grumo contiene " + cantidadUsuarios + " usuarios (" + porcentaje + ")%");
-            System.out.println("No son necesarias nuevas relaciones de amistad");
+            System.out.println("No son necesarias nuevas relaciones de amistad.");
         }
-
+        elAnalisis.tFOrdenarYSeleccionar = hora();
     }
 
     private static void salvarConexiones() {
@@ -327,6 +331,21 @@ public class CaraLibro {
     private static Date hora() {
         Date date = new Date();
         return date;
+    }
+
+    private static void crearGrumos() {
+        ArrayList usuariosGrumo; // Listado de los usuarios que pertenecen a un grumo
+
+        elAnalisis.tIListaGrumos = hora();
+
+        for (Object usuario : elAnalisis.listadoUsuarios) {
+            usuariosGrumo = new ArrayList();
+            uber_amigos((int) usuario, elAnalisis.listadoConexiones, usuariosGrumo);
+            elAnalisis.grumos.add(usuariosGrumo);
+        }
+        quitarVacios(elAnalisis.grumos);
+
+        elAnalisis.tFListaGrumos = hora();
     }
 
 }
