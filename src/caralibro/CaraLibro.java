@@ -6,11 +6,16 @@
 package caralibro;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Scanner;
+import java.util.Timer;
 
 /**
  *
@@ -68,28 +73,35 @@ public class CaraLibro {
      * contrario
      */
     public boolean leerArchivo() {
+        FileInputStream ficheroStream;
         Scanner miEscaner;
         int contadorLinea = 0; //Cuenta la linea del archivo en la que me llego
 
         try {
-            miEscaner = new Scanner(new File("DOCS/" + nombreFicheroInicio));
+            ficheroStream = new FileInputStream("DOCS/" + nombreFicheroInicio);
+            miEscaner = new Scanner(ficheroStream, "UTF-8");
+            hora();
             while (miEscaner.hasNextLine()) {
-                switch (contadorLinea) {
-                    case 0:
-                        numeroUsuarios = Integer.parseInt(miEscaner.nextLine());
-                        break;
-                    case 1:
-                        numeroConexiones = Integer.parseInt(miEscaner.nextLine());
-                        break;
-                }
+                //System.out.println(contadorLinea);
                 if (contadorLinea > 1) {
                     procesarConexiones(miEscaner.nextLine());
+                } else {
+                    switch (contadorLinea) {
+                        case 0:
+                            numeroUsuarios = Integer.parseInt(miEscaner.nextLine());
+                            break;
+                        case 1:
+                            numeroConexiones = Integer.parseInt(miEscaner.nextLine());
+                            break;
+                    }
                 }
                 contadorLinea++;
             }
+            hora();
             //System.out.println("Numero usuarios: " + numeroUsuarios);
             //System.out.println("Numero conexiones: " + numeroConexiones);
             //System.out.println("");
+            ficheroStream.close();
             miEscaner.close();
         } catch (FileNotFoundException fnfEx) {
             System.err.println("No se ha encontrado el archivo " + nombreFicheroInicio);
@@ -153,7 +165,7 @@ public class CaraLibro {
             }
             usuariosGrumo = new ArrayList();
         }
-        System.out.println(grumos.toString());
+        //System.out.println(grumos.toString());
 
         boolean cambiosRealizados = true;
 
@@ -161,15 +173,15 @@ public class CaraLibro {
         int tamanioGrumos = grumos.size();
         int siguiente;
         for (int i = 0; i < tamanioGrumos; i++) {
-            
+
             do {
-                System.out.println(grumos.size());
+                //System.out.println(grumos.size());
                 tamanioGrumos = grumos.size();
                 cambiosRealizados = false;
 
                 siguiente = i + 1;
-                
-                if(siguiente>=tamanioGrumos){
+
+                if (siguiente >= tamanioGrumos) {
                     break;
                 }
 
@@ -189,20 +201,22 @@ public class CaraLibro {
                 if (cambiosRealizados) {
                     //cambiosRealizados = false;
                     grumos.remove(siguiente);
+                }else{
+                    continue;
                 }
-                System.out.println(grumos.toString());
-            }while (cambiosRealizados);
-            if(siguiente>=tamanioGrumos){
-                    break;
-                }
+                //System.out.println(grumos.toString());
+            } while (cambiosRealizados);
+            if (siguiente >= tamanioGrumos) {
+                break;
+            }
         }
-        System.out.println(grumos.toString());
+        //System.out.println(grumos.toString());
     }
 
     private void ordenarConexiones() {
-        for (Conexion laConexion : listadoConexiones) {
+        /*for (Conexion laConexion : listadoConexiones) {
             System.out.println("\t[" + laConexion.usuario1 + "," + laConexion.usuario2 + "]");
-        }
+        }*/
 
         Conexion[] lista = listadoConexiones.toArray(new Conexion[listadoConexiones.size()]);
 
@@ -221,15 +235,24 @@ public class CaraLibro {
             }
         }
 
-        System.out.println("ORDENADA");
+        /*System.out.println("ORDENADA");
         for (int i = 0; i < lista.length; i++) {
             System.out.println("\t[" + lista[i].usuario1 + "," + lista[i].usuario2 + "]");
-        }
+        }*/
 
         listadoConexiones.clear();
         for (int i = 0; i < lista.length; i++) {
             listadoConexiones.add(lista[i]);
         }
+    }
+
+    /**
+     * Función que imprime la hora cuando se la invoca
+     */
+    private void hora() {
+        DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss.ms");
+        Date date = new Date();
+        System.out.println("Hora actual: " + dateFormat.format(date));
     }
 
 }
