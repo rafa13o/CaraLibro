@@ -24,6 +24,7 @@ public class Analisis {
     ArrayList<Conexion> listadoConexiones = new ArrayList<>(); // Listado de las conexiones obtenido del fichero (futuro 'red')
     ArrayList listadoUsuarios = new ArrayList(); // Listado de todos los usuarios de la red social (futuro 'usr')
     ArrayList grumos = new ArrayList(); // Listado de grumos (futuro 'grus')
+    ArrayList<Conexion> conexionesExtra = new ArrayList<>();
 
     Date tILecturaFichero;// tiempo inicial lectura fichero    
     Date tFLecturaFichero;// tiempo final lectura fichero

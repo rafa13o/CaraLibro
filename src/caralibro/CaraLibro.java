@@ -5,11 +5,17 @@
  */
 package caralibro;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -42,7 +48,7 @@ public class CaraLibro {
         } else {
 
         }
-        
+
         //pedirPorcentaje();
         ordenarGrumos();
         seleccionarGrumos();
@@ -65,12 +71,12 @@ public class CaraLibro {
      */
     private static void pedirNombreArchivo() {
         Scanner miEscanner = new Scanner(System.in);
-        
+
         // Pedir nombre fichero inicial
         System.out.print("Fichero principal: ");
         elAnalisis.nombreFicheroPrincipal = miEscanner.nextLine();
         elAnalisis.nombreFicheroPrincipal += ".txt";
-        
+
         // Pedir porcentaje
         System.out.print("Indicque porcentaje: ");
         elAnalisis.porcentajeDeseado = miEscanner.nextFloat();
@@ -90,7 +96,6 @@ public class CaraLibro {
         elAnalisis.porcentajeDeseado = miEscanner.nextFloat();
         miEscanner.close();
     }*/
-
     /**
      * Lee el fichero de inicio del programa. Procesa cada línea (nUsuarios,
      * nConexiones, conexiones) Comprueba si el fichero existe y se puede leer
@@ -242,52 +247,78 @@ public class CaraLibro {
             grumosSeleccionados.add(grumo1);
 
             cantidadUsuarios += grumo1.size();
-            porcentaje = (float) (cantidadUsuarios*100/elAnalisis.numeroUsuarios);
+            porcentaje = (float) (cantidadUsuarios * 100 / elAnalisis.numeroUsuarios);
 
-            if (porcentaje >= elAnalisis.porcentajeDeseado) {
+            if (porcentaje > elAnalisis.porcentajeDeseado) {
                 break;
             }
         }
-        
-        if(grumosSeleccionados.size() > 1){
-            System.out.println("Se deben unir los "+grumosSeleccionados.size()+" mayores");
-            for(int i = 0; i<grumosSeleccionados.size(); i++){
-                int numeroGrumo = i+1;
+
+        if (grumosSeleccionados.size() > 1) {
+            System.out.println("Se deben unir los " + grumosSeleccionados.size() + " mayores");
+            for (int i = 0; i < grumosSeleccionados.size(); i++) {
+                int numeroGrumo = i + 1;
                 ArrayList grumo = (ArrayList) grumosSeleccionados.get(i);
                 int cantidadUsuariosEnGrumo = grumo.size();
-                float porcentajeGrumo = cantidadUsuariosEnGrumo*100/elAnalisis.numeroUsuarios;
-                System.out.println("#"+numeroGrumo+": "+cantidadUsuariosEnGrumo+" usuarios "+porcentajeGrumo+" %");
+                float porcentajeGrumo = cantidadUsuariosEnGrumo * 100 / elAnalisis.numeroUsuarios;
+                System.out.println("#" + numeroGrumo + ": " + cantidadUsuariosEnGrumo + " usuarios " + porcentajeGrumo + " %");
             }
             System.out.println(grumosSeleccionados.toString());
-            System.out.println("Nuevas relaciones de amistad (salvadas en extra.txt");
-            for(int i = 0; i<grumosSeleccionados.size(); i++){
+            System.out.println("Nuevas relaciones de amistad (salvadas en extra.txt)");
+            for (int i = 0; i < grumosSeleccionados.size(); i++) {
                 int usuario1, usuario2;
-                int siguiente = i+1;
-                if(siguiente >= grumosSeleccionados.size()){
+                int siguiente = i + 1;
+                if (siguiente >= grumosSeleccionados.size()) {
                     break;
                 }
                 ArrayList grumo1 = (ArrayList) grumosSeleccionados.get(i);
                 ArrayList grumo2 = (ArrayList) grumosSeleccionados.get(siguiente);
-                
-                if(grumo1.size() <= siguiente){
+
+                if (grumo1.size() <= siguiente) {
                     usuario1 = (int) grumo1.get(i);
-                }else{
+                } else {
                     usuario1 = (int) grumo1.get(i);
                 }
-                
-                if(grumo2.size()<=siguiente){
+
+                if (grumo2.size() <= siguiente) {
                     usuario2 = (int) grumo2.get(0);
-                }else{
+                } else {
                     usuario2 = (int) grumo2.get(siguiente);
                 }
-                System.out.println(usuario1+" <-> "+usuario2);
-                
+                elAnalisis.conexionesExtra.add(new Conexion(usuario1, usuario2));
+                System.out.println(usuario1 + " <-> " + usuario2);
             }
-        }else{
-            System.out.println("El mayor grumo contiene "+cantidadUsuarios+" usuarios ("+porcentaje+")%");
+            salvarConexiones();
+        } else {
+            System.out.println("El mayor grumo contiene " + cantidadUsuarios + " usuarios (" + porcentaje + ")%");
             System.out.println("No son necesarias nuevas relaciones de amistad");
         }
-        
+
+    }
+
+    private static void salvarConexiones() {
+        FileWriter fichero = null;
+        PrintWriter pw = null;
+
+        try {
+            fichero = new FileWriter("DOCS/extra.txt");
+            pw = new PrintWriter(fichero);
+            for (int i = 0; i < elAnalisis.conexionesExtra.size(); i++) {
+                Conexion laConexion = elAnalisis.conexionesExtra.get(i);
+                pw.println(laConexion.usuario1 + " " + laConexion.usuario2);
+            }
+        } catch (IOException ex) {
+            System.err.println("Archivo no encontrado.");
+        } finally {
+            try {
+                if (null != fichero) {
+                    fichero.close();
+                }
+            } catch (IOException ex) {
+                System.err.println("El fichero no se pudo cerrar correctamente.");
+            }
+        }
+
     }
 
     /**
