@@ -5,17 +5,13 @@
  */
 package caralibro;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.Scanner;
-import java.util.Timer;
 
 /**
  *
@@ -23,19 +19,32 @@ import java.util.Timer;
  */
 public class CaraLibro {
 
-    String nombreFicheroInicio;
-    int numeroUsuarios, numeroConexiones;
-    ArrayList listadoUsuarios = new ArrayList();
-    ArrayList<Conexion> listadoConexiones = new ArrayList<Conexion>();
-    ArrayList grumos = new ArrayList();
+    static int numeroUsuarios, numeroConexiones;
+    static ArrayList usuariosProcesados = new ArrayList(); // Usuarios que ya han sido procesados en un grumo
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
         CaraLibro claseInicial = new CaraLibro();
-        claseInicial.pedirNombreArchivo();
-        claseInicial.procesarGrumos();
+        ArrayList<Conexion> listadoConexiones = new ArrayList<>(); // Listado de las conexiones obtenido del fichero (futuro 'red')
+        ArrayList listadoUsuarios = new ArrayList(); // Listado de todos los usuarios de la red social (futuro 'usr')
+        ArrayList usuariosGrumo; // Listado de los usuarios que pertenecen a un grumo
+        ArrayList grumos = new ArrayList(); // Listado de grumos (futuro 'grus')
+        String nombreFichero = pedirNombreArchivo();
+
+        if (leerArchivo(nombreFichero, listadoConexiones, listadoUsuarios)) { // Se ha leído y procesado correctamente
+            for (Object usuario : listadoUsuarios) {
+                usuariosGrumo = new ArrayList();
+                uber_amigos((int) usuario, listadoConexiones, usuariosGrumo);
+                grumos.add(usuariosGrumo);
+            }
+            quitarVacios(grumos);
+            //System.out.println(grumos.toString());
+            ordenarGrumos();
+        }else{
+            
+        }
 
         /*
         System.out.println("Nº Usuarios: " + claseInicial.numeroUsuarios);
@@ -53,8 +62,9 @@ public class CaraLibro {
      * Pide el nombre del archivo al usuario y agrega el .txt para que se pueda
      * localizar
      */
-    private void pedirNombreArchivo() {
+    private static String pedirNombreArchivo() {
         boolean lecturaCorrecta = false;
+        String nombreFicheroInicio;
 
         Scanner miEscanner = new Scanner(System.in);
         System.out.println("Por favor, introduzca el nombre del fichero (el fichero deberá ser de tipo .txt)");
@@ -62,17 +72,21 @@ public class CaraLibro {
         nombreFicheroInicio += ".txt";
         miEscanner.close();
 
-        leerArchivo();
+        return nombreFicheroInicio;
     }
 
     /**
      * Lee el fichero de inicio del programa. Procesa cada línea (nUsuarios,
      * nConexiones, conexiones) Comprueba si el fichero existe y se puede leer
      *
+     * @param nombreFicheroInicio Nombre del fichero de lectura que ha indicado
+     * el usuario
+     * @param listadoConexiones
+     * @param listadoUsuarios
      * @return TRUE si el fichero existe y se ha podido procesar, FALSE en caso
      * contrario
      */
-    public boolean leerArchivo() {
+    public static boolean leerArchivo(String nombreFicheroInicio, ArrayList listadoConexiones, ArrayList listadoUsuarios) {
         FileInputStream ficheroStream;
         Scanner miEscaner;
         int contadorLinea = 0; //Cuenta la linea del archivo en la que me llego
@@ -84,7 +98,7 @@ public class CaraLibro {
             while (miEscaner.hasNextLine()) {
                 //System.out.println(contadorLinea);
                 if (contadorLinea > 1) {
-                    procesarConexiones(miEscaner.nextLine());
+                    procesarConexiones(miEscaner.nextLine(), listadoConexiones, listadoUsuarios);
                 } else {
                     switch (contadorLinea) {
                         case 0:
@@ -114,8 +128,15 @@ public class CaraLibro {
         return true;
     }
 
-    private void procesarConexiones(String conexion) {
+    /**
+     *
+     * @param conexion
+     * @param listadoConexiones
+     * @param listadoUsuarios
+     */
+    private static void procesarConexiones(String conexion, ArrayList listadoConexiones, ArrayList listadoUsuarios) {
         Conexion laConexion;
+
         String[] listaConexion = conexion.split(" ");
         int usuario1 = Integer.parseInt(listaConexion[0]);
         int usuario2 = Integer.parseInt(listaConexion[1]);
@@ -132,124 +153,49 @@ public class CaraLibro {
         }
     }
 
-    private void procesarGrumos() {
-        ArrayList usuariosProcesados = new ArrayList();
-        ArrayList usuariosGrumo = new ArrayList();
-        int contador = 0;
-
-        //ordenarConexiones();
-        // Primera agrupacion de grumos
-        for (Object usuario : listadoUsuarios) {
-            if (!usuariosProcesados.contains(usuario)) {
-                usuariosProcesados.add(usuario);
-                usuariosGrumo.add(usuario);
-
-                for (Conexion laConexion : listadoConexiones) {
-                    if ((int) laConexion.usuario1 == (int) usuario || laConexion.usuario2 == (int) usuario) {
-                        if (!usuariosProcesados.contains(laConexion.usuario1)) {
-                            usuariosProcesados.add(laConexion.usuario1);
-                        }
-                        if (!usuariosProcesados.contains(laConexion.usuario2)) {
-                            usuariosProcesados.add(laConexion.usuario2);
-                        }
-                        if (!usuariosGrumo.contains(laConexion.usuario1)) {
-                            usuariosGrumo.add(laConexion.usuario1);
-                        }
-                        if (!usuariosGrumo.contains(laConexion.usuario2)) {
-                            usuariosGrumo.add(laConexion.usuario2);
-                        }
+    /**
+     *
+     * @param usuarioInicial
+     * @param conexiones
+     * @param grumo
+     */
+    private static void uber_amigos(int usuarioInicial, ArrayList<Conexion> conexiones, ArrayList grumo) {
+        if (!usuariosProcesados.contains(usuarioInicial)) { // Si ese usuario no se ha procesado todavia
+            usuariosProcesados.add(usuarioInicial);
+            for (Conexion laConexion : conexiones) {
+                if (laConexion.usuario1 == usuarioInicial) {
+                    if (!grumo.contains(laConexion.usuario2)) {
+                        grumo.add(laConexion.usuario2);
+                        uber_amigos(laConexion.usuario2, conexiones, grumo);
+                    }
+                } else if (laConexion.usuario2 == usuarioInicial) {
+                    if (!grumo.contains(laConexion.usuario1)) {
+                        grumo.add(laConexion.usuario1);
+                        uber_amigos(laConexion.usuario1, conexiones, grumo);
                     }
                 }
-                grumos.add(usuariosGrumo);
-                //System.out.println(usuariosGrumo.toString());
-            }
-            usuariosGrumo = new ArrayList();
-        }
-        //System.out.println(grumos.toString());
-
-        boolean cambiosRealizados = true;
-
-        //Segunda agrupacion de grumos
-        int tamanioGrumos = grumos.size();
-        int siguiente;
-        for (int i = 0; i < tamanioGrumos; i++) {
-
-            do {
-                //System.out.println(grumos.size());
-                tamanioGrumos = grumos.size();
-                cambiosRealizados = false;
-
-                siguiente = i + 1;
-
-                if (siguiente >= tamanioGrumos) {
-                    break;
-                }
-
-                ArrayList grumo1 = (ArrayList) grumos.get(i);
-                ArrayList grumo2 = (ArrayList) grumos.get(siguiente); // Empiezo a mirar a partir del segundo grumo
-
-                for (int j = 0; j < grumo2.size(); j++) {
-                    if (grumo1.contains(grumo2.get(j))) {
-                        cambiosRealizados = true;
-                        for (int k = 0; k < grumo2.size(); k++) {
-                            if (!grumo1.contains(grumo2.get(k))) {
-                                grumo1.add(grumo2.get(k));
-                            }
-                        }
-                    }
-                }
-                if (cambiosRealizados) {
-                    //cambiosRealizados = false;
-                    grumos.remove(siguiente);
-                }else{
-                    continue;
-                }
-                //System.out.println(grumos.toString());
-            } while (cambiosRealizados);
-            if (siguiente >= tamanioGrumos) {
-                break;
             }
         }
-        //System.out.println(grumos.toString());
     }
 
-    private void ordenarConexiones() {
-        /*for (Conexion laConexion : listadoConexiones) {
-            System.out.println("\t[" + laConexion.usuario1 + "," + laConexion.usuario2 + "]");
-        }*/
-
-        Conexion[] lista = listadoConexiones.toArray(new Conexion[listadoConexiones.size()]);
-
-        boolean done = false;
-
-        while (!done) {
-            done = true;
-
-            for (int i = 1; i < lista.length; i++) {
-                if (lista[i - 1].usuario1 < lista[i].usuario1) {
-                    done = false;
-                    Conexion temporal = lista[i];
-                    lista[i] = lista[i - 1];
-                    lista[i - 1] = temporal;
+    private static void quitarVacios(ArrayList listado) {
+        boolean unaVacia;
+        do {
+            unaVacia = false;
+            for (int i = 0; i < listado.size(); i++) {
+                ArrayList sublista = (ArrayList) listado.get(i);
+                if (sublista.isEmpty()) {
+                    unaVacia = true;
+                    listado.remove(i);
                 }
             }
-        }
-
-        /*System.out.println("ORDENADA");
-        for (int i = 0; i < lista.length; i++) {
-            System.out.println("\t[" + lista[i].usuario1 + "," + lista[i].usuario2 + "]");
-        }*/
-
-        listadoConexiones.clear();
-        for (int i = 0; i < lista.length; i++) {
-            listadoConexiones.add(lista[i]);
-        }
+        } while (unaVacia);
     }
 
     /**
      * Función que imprime la hora cuando se la invoca
      */
-    private void hora() {
+    private static void hora() {
         DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss.ms");
         Date date = new Date();
         System.out.println("Hora actual: " + dateFormat.format(date));
