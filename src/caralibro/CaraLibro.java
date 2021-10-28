@@ -39,8 +39,11 @@ public class CaraLibro {
         // Llamadas necesarias a funciones
         pedirDatos();
         crearGrumos();
+        System.out.printf("Creación lista grumos: %.5f seg.\n", elAnalisis.tiempoListaGrumos());
+        System.out.println("Existen "+elAnalisis.grumos.size()+" grumos.");
         ordenarGrumos();
         seleccionarGrumos();
+        System.out.printf("Ordenación y selección de grumos: %.5f seg.\n", elAnalisis.tiempoOrdenarYSeleccionar());
 
         /*
         System.out.println("Nº Usuarios: " + claseInicial.numeroUsuarios);
@@ -65,7 +68,7 @@ public class CaraLibro {
         System.out.print("Fichero principal: ");
         elAnalisis.nombreFicheroPrincipal = miEscanner.nextLine();
         leerArchivo(true);
-        System.out.printf("Lectura fichero: %.5f seg.\n",elAnalisis.tiempoLectura());
+        System.out.printf("Lectura fichero: %.5f seg.\n", elAnalisis.tiempoLectura());
 
         // Pedir fichero de nuevas conexiones
         System.out.print("Fichero de nuevas conexiones (pulse enter si no existe): ");
@@ -73,12 +76,14 @@ public class CaraLibro {
         if (elAnalisis.nombreFicheroNuevasConexiones != null && !elAnalisis.nombreFicheroNuevasConexiones.equals("")) {
             leerArchivo(false);
         }
-        System.out.println(elAnalisis.numeroUsuarios+" usuarios, "+elAnalisis.listadoConexiones.size()+" conexiones");
+        System.out.println(elAnalisis.numeroUsuarios + " usuarios, " + elAnalisis.listadoConexiones.size() + " conexiones");
 
         // Pedir porcentaje
-        System.out.print("Indicque porcentaje: ");
+        System.out.print("Porcentaje tamaño mayor grumo: ");
         elAnalisis.porcentajeDeseado = miEscanner.nextFloat();
         miEscanner.close();
+
+        System.out.printf("Creación lista usuarios: %.5f seg.\n", elAnalisis.tiempoListaUsuarios());
     }
 
     /**
@@ -106,7 +111,7 @@ public class CaraLibro {
             miEscaner = new Scanner(ficheroStream, "UTF-8");
             elAnalisis.tILecturaFichero = hora();
             while (miEscaner.hasNextLine()) {
-                //System.out.println(contadorLinea);
+                elAnalisis.tIListaUsuarios = hora();
                 if (tipoFichero) { //Es el inicial
                     if (contadorLinea > 1) {
                         procesarConexiones(miEscaner.nextLine());
@@ -125,7 +130,7 @@ public class CaraLibro {
                 }
                 contadorLinea++;
             }
-
+            elAnalisis.tFListaUsuarios = hora();
             elAnalisis.tFLecturaFichero = hora();
             //System.out.println("Numero usuarios: " + numeroUsuarios);
             //System.out.println("Numero conexiones: " + numeroConexiones);
@@ -219,6 +224,7 @@ public class CaraLibro {
     }
 
     private static void ordenarGrumos() {
+        elAnalisis.tIOrdenarYSeleccionar = hora();
         for (int i = 0; i < elAnalisis.grumos.size(); i++) {
             int siguiente = i + 1;
             if (siguiente >= elAnalisis.grumos.size()) {
@@ -262,7 +268,6 @@ public class CaraLibro {
                 float porcentajeGrumo = cantidadUsuariosEnGrumo * 100 / elAnalisis.numeroUsuarios;
                 System.out.println("#" + numeroGrumo + ": " + cantidadUsuariosEnGrumo + " usuarios " + porcentajeGrumo + " %");
             }
-            System.out.println(grumosSeleccionados.toString());
             System.out.println("Nuevas relaciones de amistad (salvadas en extra.txt)");
             for (int i = 0; i < grumosSeleccionados.size(); i++) {
                 int usuario1, usuario2;
@@ -290,9 +295,9 @@ public class CaraLibro {
             salvarConexiones();
         } else {
             System.out.println("El mayor grumo contiene " + cantidadUsuarios + " usuarios (" + porcentaje + ")%");
-            System.out.println("No son necesarias nuevas relaciones de amistad");
+            System.out.println("No son necesarias nuevas relaciones de amistad.");
         }
-
+        elAnalisis.tFOrdenarYSeleccionar = hora();
     }
 
     private static void salvarConexiones() {
@@ -331,12 +336,16 @@ public class CaraLibro {
     private static void crearGrumos() {
         ArrayList usuariosGrumo; // Listado de los usuarios que pertenecen a un grumo
 
+        elAnalisis.tIListaGrumos = hora();
+
         for (Object usuario : elAnalisis.listadoUsuarios) {
             usuariosGrumo = new ArrayList();
             uber_amigos((int) usuario, elAnalisis.listadoConexiones, usuariosGrumo);
             elAnalisis.grumos.add(usuariosGrumo);
         }
         quitarVacios(elAnalisis.grumos);
+
+        elAnalisis.tFListaGrumos = hora();
     }
 
 }

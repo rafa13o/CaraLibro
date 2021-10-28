@@ -51,8 +51,20 @@ public class Analisis {
         return resultado;
     }
     
+    public float tiempoListaUsuarios(){
+        float tiempo = tFListaUsuarios.getTime() - tIListaUsuarios.getTime();
+        float resultado = tiempo / 100;
+        return resultado;
+    }
+    
     public float tiempoListaGrumos(){
         float tiempo = tFListaGrumos.getTime() - tIListaGrumos.getTime();
+        float resultado = tiempo / 100;
+        return resultado;
+    }
+    
+    public float tiempoOrdenarYSeleccionar(){
+        float tiempo = tFOrdenarYSeleccionar.getTime() - tIOrdenarYSeleccionar.getTime();
         float resultado = tiempo / 100;
         return resultado;
     }
