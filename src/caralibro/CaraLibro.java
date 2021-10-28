@@ -7,8 +7,6 @@ package caralibro;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
@@ -19,21 +17,21 @@ import java.util.Scanner;
  */
 public class CaraLibro {
 
-    static int numeroUsuarios, numeroConexiones;
     static ArrayList usuariosProcesados = new ArrayList(); // Usuarios que ya han sido procesados en un grumo
-
+    static Analisis elAnalisis;
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        CaraLibro claseInicial = new CaraLibro();
+        elAnalisis = new Analisis();
+        
         ArrayList<Conexion> listadoConexiones = new ArrayList<>(); // Listado de las conexiones obtenido del fichero (futuro 'red')
         ArrayList listadoUsuarios = new ArrayList(); // Listado de todos los usuarios de la red social (futuro 'usr')
         ArrayList usuariosGrumo; // Listado de los usuarios que pertenecen a un grumo
         ArrayList grumos = new ArrayList(); // Listado de grumos (futuro 'grus')
-        String nombreFichero = pedirNombreArchivo();
+        pedirNombreArchivo();
 
-        if (leerArchivo(nombreFichero, listadoConexiones, listadoUsuarios)) { // Se ha leído y procesado correctamente
+        if (leerArchivo( listadoConexiones, listadoUsuarios)) { // Se ha leído y procesado correctamente
             for (Object usuario : listadoUsuarios) {
                 usuariosGrumo = new ArrayList();
                 uber_amigos((int) usuario, listadoConexiones, usuariosGrumo);
@@ -62,17 +60,18 @@ public class CaraLibro {
      * Pide el nombre del archivo al usuario y agrega el .txt para que se pueda
      * localizar
      */
-    private static String pedirNombreArchivo() {
-        boolean lecturaCorrecta = false;
-        String nombreFicheroInicio;
-
+    private static void pedirNombreArchivo() {
         Scanner miEscanner = new Scanner(System.in);
-        System.out.println("Por favor, introduzca el nombre del fichero (el fichero deberá ser de tipo .txt)");
-        nombreFicheroInicio = miEscanner.nextLine();
-        nombreFicheroInicio += ".txt";
+        System.out.print("Fichero principal: ");
+        elAnalisis.nombreFicheroPrincipal = miEscanner.nextLine();
+        elAnalisis.nombreFicheroPrincipal += ".txt";
         miEscanner.close();
-
-        return nombreFicheroInicio;
+    }
+    
+    private static void pedirNombreNuevasConexiones(){
+        Scanner miEscanner = new Scanner(System.in);
+        System.out.print("Fichero de nuevas conexiones (pulse enter si no existe): ");
+        elAnalisis.nombreFicheroPrincipal = miEscanner.nextLine();
     }
 
     /**
@@ -86,13 +85,13 @@ public class CaraLibro {
      * @return TRUE si el fichero existe y se ha podido procesar, FALSE en caso
      * contrario
      */
-    public static boolean leerArchivo(String nombreFicheroInicio, ArrayList listadoConexiones, ArrayList listadoUsuarios) {
+    public static boolean leerArchivo(ArrayList listadoConexiones, ArrayList listadoUsuarios) {
         FileInputStream ficheroStream;
         Scanner miEscaner;
         int contadorLinea = 0; //Cuenta la linea del archivo en la que me llego
 
         try {
-            ficheroStream = new FileInputStream("DOCS/" + nombreFicheroInicio);
+            ficheroStream = new FileInputStream("DOCS/" + elAnalisis.nombreFicheroPrincipal);
             miEscaner = new Scanner(ficheroStream, "UTF-8");
             hora();
             while (miEscaner.hasNextLine()) {
@@ -102,10 +101,10 @@ public class CaraLibro {
                 } else {
                     switch (contadorLinea) {
                         case 0:
-                            numeroUsuarios = Integer.parseInt(miEscaner.nextLine());
+                            elAnalisis.numeroUsuarios = Integer.parseInt(miEscaner.nextLine());
                             break;
                         case 1:
-                            numeroConexiones = Integer.parseInt(miEscaner.nextLine());
+                            elAnalisis.numeroConexiones = Integer.parseInt(miEscaner.nextLine());
                             break;
                     }
                 }
@@ -118,7 +117,7 @@ public class CaraLibro {
             ficheroStream.close();
             miEscaner.close();
         } catch (FileNotFoundException fnfEx) {
-            System.err.println("No se ha encontrado el archivo " + nombreFicheroInicio);
+            System.err.println("No se ha encontrado el archivo " + elAnalisis.nombreFicheroPrincipal);
             return false;
         } catch (Exception ex) {
             System.err.println("Error no controlado.");
@@ -211,10 +210,9 @@ public class CaraLibro {
     /**
      * Función que imprime la hora cuando se la invoca
      */
-    private static void hora() {
-        DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss.ms");
+    private static long hora() {
         Date date = new Date();
-        System.out.println("Milisegundos: " + date.getTime());
+        return date.getTime();
     }
 
 }
