@@ -42,7 +42,7 @@ public class CaraLibro {
         pedirDatos();
         crearGrumos();
         System.out.printf("Creación lista grumos: %.5f seg.\n", elAnalisis.tiempoListaGrumos());
-        System.out.println("Existen "+elAnalisis.grumos.size()+" grumos.");
+        System.out.println("Existen " + elAnalisis.grumos.size() + " grumos.");
         ordenarGrumos();
         seleccionarGrumos();
         System.out.printf("Ordenación y selección de grumos: %.5f seg.\n", elAnalisis.tiempoOrdenarYSeleccionar());
@@ -78,6 +78,7 @@ public class CaraLibro {
         if (elAnalisis.nombreFicheroNuevasConexiones != null && !elAnalisis.nombreFicheroNuevasConexiones.equals("")) {
             leerArchivo(false);
         }
+        procesarConexiones();
         System.out.println(elAnalisis.numeroUsuarios + " usuarios, " + elAnalisis.listadoConexiones.size() + " conexiones");
 
         // Pedir porcentaje
@@ -114,8 +115,8 @@ public class CaraLibro {
             elAnalisis.tILecturaFichero = hora();
             String line;
             while ((line = bufferedReader.readLine()) != null) {
-                elAnalisis.tIListaUsuarios = hora();
-                if (tipoFichero) { //Es el inicial
+                elAnalisis.datosArchivo.add(line);
+                /*if (tipoFichero) { //Es el inicial
                     if (contadorLinea > 1) {
                         procesarConexiones(line);
                     } else {
@@ -131,9 +132,8 @@ public class CaraLibro {
                 } else {
                     procesarConexiones(line);
                 }
-                contadorLinea++;
+                contadorLinea++;*/
             }
-            elAnalisis.tFListaUsuarios = hora();
             elAnalisis.tFLecturaFichero = hora();
             //System.out.println("Numero usuarios: " + numeroUsuarios);
             //System.out.println("Numero conexiones: " + numeroConexiones);
@@ -162,23 +162,23 @@ public class CaraLibro {
      * @param listadoConexiones
      * @param listadoUsuarios
      */
-    private static void procesarConexiones(String conexion) {
+    private static void procesarConexiones() {
         Conexion laConexion;
 
-        String[] listaConexion = conexion.split(" ");
-        int usuario1 = Integer.parseInt(listaConexion[0]);
-        int usuario2 = Integer.parseInt(listaConexion[1]);
-        laConexion = new Conexion(usuario1, usuario2);
-        //System.err.println("Conexión: \n\tu1: " + usuario1 + "\n\tu2: " + usuario2);
-        elAnalisis.listadoConexiones.add(laConexion);
+        elAnalisis.tIListaUsuarios = hora();
 
-        if (!elAnalisis.listadoUsuarios.contains(usuario1)) { //Si el usuario no existe
-            elAnalisis.listadoUsuarios.add(usuario1);
-        }
+        elAnalisis.numeroUsuarios = Integer.parseInt(elAnalisis.datosArchivo.get(0).toString());
+        elAnalisis.numeroConexiones = Integer.parseInt(elAnalisis.datosArchivo.get(1).toString());
 
-        if (!elAnalisis.listadoUsuarios.contains(usuario2)) {
-            elAnalisis.listadoUsuarios.add(usuario2);
+        for (int i = 2; i < elAnalisis.datosArchivo.size(); i++) {
+            String conexion = elAnalisis.datosArchivo.get(i).toString();
+            //String[] listaConexion = conexion.split(" ");
+            //int usuario1 = Integer.parseInt(listaConexion[0]);
+            //int usuario2 = Integer.parseInt(listaConexion[1]);
+            laConexion = new Conexion(conexion);
+            //System.err.println("Conexión: \n\tu1: " + usuario1 + "\n\tu2: " + usuario2);
         }
+        elAnalisis.tFListaUsuarios = hora();
     }
 
     /**

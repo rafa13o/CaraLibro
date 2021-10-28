@@ -25,6 +25,7 @@ public class Analisis {
     ArrayList listadoUsuarios = new ArrayList(); // Listado de todos los usuarios de la red social (futuro 'usr')
     ArrayList grumos = new ArrayList(); // Listado de grumos (futuro 'grus')
     ArrayList<Conexion> conexionesExtra = new ArrayList<>();
+    ArrayList datosArchivo = new ArrayList();
 
     Date tILecturaFichero;// tiempo inicial lectura fichero    
     Date tFLecturaFichero;// tiempo final lectura fichero
@@ -47,25 +48,25 @@ public class Analisis {
     
     public float tiempoLectura(){
         float tiempo = tFLecturaFichero.getTime() - tILecturaFichero.getTime();
-        float resultado = tiempo / 100;
+        float resultado = tiempo / 1000;
         return resultado;
     }
     
     public float tiempoListaUsuarios(){
         float tiempo = tFListaUsuarios.getTime() - tIListaUsuarios.getTime();
-        float resultado = tiempo / 100;
+        float resultado = tiempo / 1000;
         return resultado;
     }
     
     public float tiempoListaGrumos(){
         float tiempo = tFListaGrumos.getTime() - tIListaGrumos.getTime();
-        float resultado = tiempo / 100;
+        float resultado = tiempo / 1000;
         return resultado;
     }
     
     public float tiempoOrdenarYSeleccionar(){
         float tiempo = tFOrdenarYSeleccionar.getTime() - tIOrdenarYSeleccionar.getTime();
-        float resultado = tiempo / 100;
+        float resultado = tiempo / 1000;
         return resultado;
     }
 
