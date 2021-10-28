@@ -30,10 +30,31 @@ public class Analisis {
     Date tFLecturaFichero;// tiempo final lectura fichero
 
     // tiempo creacion lista usuarios
+    Date tIListaUsuarios;
+    Date tFListaUsuarios;
+
     // tiempo creacion lista grumos
+    Date tIListaGrumos;
+    Date tFListaGrumos;
+
     // tiempo ordenacion y seleccion grumos
+    Date tIOrdenarYSeleccionar;
+    Date tFOrdenarYSeleccionar;
+
     Analisis() {
         // Constructor vacio
+    }
+    
+    public float tiempoLectura(){
+        float tiempo = tFLecturaFichero.getTime() - tILecturaFichero.getTime();
+        float resultado = tiempo / 100;
+        return resultado;
+    }
+    
+    public float tiempoListaGrumos(){
+        float tiempo = tFListaGrumos.getTime() - tIListaGrumos.getTime();
+        float resultado = tiempo / 100;
+        return resultado;
     }
 
     @Override
