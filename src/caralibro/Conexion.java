@@ -9,7 +9,7 @@ import static caralibro.CaraLibro.elAnalisis;
  */
 /**
  *
- * @author Rafa
+ * @author Paula Alcalaya Álvarez
  */
 public class Conexion {
 
@@ -25,14 +25,14 @@ public class Conexion {
         this.usuario1 = Integer.parseInt(datos.split(" ")[0]);
         this.usuario2 = Integer.parseInt(datos.split(" ")[1]);
 
-        elAnalisis.listadoConexiones.add(this);
+        elAnalisis.red.add(this);
 
-        if (!elAnalisis.listadoUsuarios.contains(usuario1)) { //Si el usuario no existe
-            elAnalisis.listadoUsuarios.add(usuario1);
+        if (!elAnalisis.usr.contains(usuario1)) { //Si el usuario no existe
+            elAnalisis.usr.add(usuario1);
         }
 
-        if (!elAnalisis.listadoUsuarios.contains(usuario2)) {
-            elAnalisis.listadoUsuarios.add(usuario2);
+        if (!elAnalisis.usr.contains(usuario2)) {
+            elAnalisis.usr.add(usuario2);
         }
     }
 

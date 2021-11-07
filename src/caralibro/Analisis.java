@@ -10,7 +10,7 @@ import java.util.Date;
 
 /**
  *
- * @author Rafa
+ * @author Paula Alcalaya Álvarez
  */
 public class Analisis {
 
@@ -21,9 +21,9 @@ public class Analisis {
     float porcentajeDeseado; // Porcentaje expresado por el usuario
     int cantidadGrumosExistentes;
 
-    ArrayList<Conexion> listadoConexiones = new ArrayList<>(); // Listado de las conexiones obtenido del fichero (futuro 'red')
-    ArrayList listadoUsuarios = new ArrayList(); // Listado de todos los usuarios de la red social (futuro 'usr')
-    ArrayList grumos = new ArrayList(); // Listado de grumos (futuro 'grus')
+    ArrayList<Conexion> red = new ArrayList<>(); // Listado de las conexiones obtenido del fichero (listadoConexiones)
+    ArrayList usr = new ArrayList(); // Listado de todos los usuarios de la red social (listadoUsuarios)
+    ArrayList grus = new ArrayList(); // Listado de grumos (grumos)
     ArrayList<Conexion> conexionesExtra = new ArrayList<>();
     ArrayList datosArchivo = new ArrayList();
 
